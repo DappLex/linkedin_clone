@@ -8,17 +8,37 @@ import { MdCalendarViewDay } from 'react-icons/md';
 import Post from './Post';
 import { useEffect, useState } from 'react';
 import { db } from './firebase';
+import firebase from 'firebase';
 
 const Feed = () => {
-    const [posts, setPosts] = useState([])
+    const [input, setInput] = useState('');
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        db.collection("post")
+        db.collection("posts")
+            .orderBy('timestamp', 'desc')
+            .onSnapshot(snapshot => {
+                setPosts(
+                    snapshot.docs.map((doc) => ({
+                        id: doc.id, ...doc.data()
+                    }))
+                )
+            })
     }, []);
 
 
-    const sendPost = (event) => {
-        event.preventDefault();
+    const sendPost = (e) => {
+        e.preventDefault();
+
+        db.collection('posts').add({
+            name: 'Dapplex G',
+            description: 'this is a message',
+            message: input,
+            photoUrl: '',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        setInput('')
     }
 
     return (
@@ -27,9 +47,12 @@ const Feed = () => {
                 <div className="feed__input">
                     <BiEdit />
                     <form>
-                        <input type="text" />
-                        <button 
-                        onClick={sendPost} type='submit'>
+                        <input
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            type="text" />
+                        <button
+                            onClick={sendPost} type='submit'>
                             Send
                         </button>
                     </form>
@@ -51,14 +74,16 @@ const Feed = () => {
                 </div>
             </div>
             {/* Post */}
-            {posts.map((post) => (
-                <Post />
+            {posts.map(({ id, name, description, message, photoUrl }) => (
+                <Post
+                    key={id}
+                    name={name}
+                    description={description}
+                    message={message}
+                    photoUrl={photoUrl}
+                />
             ))}
-            <Post
-                name='Dapplex G'
-                description="This is a test"
-                message="Wow it worked"
-            />
+
         </div>
     )
 }

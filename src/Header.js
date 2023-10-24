@@ -18,7 +18,7 @@ const Header = () => {
 
                 <div className="Header__search">
                     <MdOutlineSearch />
-                    <input type="text" />
+                    <input type="text" placeholder='search' />
                 </div>
             </div>
             <div className="Header__right">
